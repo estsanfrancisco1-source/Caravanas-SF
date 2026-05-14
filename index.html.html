@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CaravanaScanner">
+  <meta name="theme-color" content="#0F6E56">
+  <title>CaravanaScanner</title>
+  <style>
+    :root{--green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;--green-text:#085041;--amber:#EF9F27;--amber-light:#FAEEDA;--amber-text:#633806;--red:#E24B4A;--red-light:#FCEBEB;--red-text:#791F1F;--bg:#F5F5F3;--bg-card:#FFF;--bg-secondary:#F1EFE8;--text:#1a1a18;--text-muted:#6b6b67;--border:rgba(0,0,0,0.12);--border-med:rgba(0,0,0,0.22);--radius:12px;--radius-sm:8px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;--mono:'Courier New',Courier,monospace}
+    @media(prefers-color-scheme:dark){:root{--bg:#1a1a18;--bg-card:#242422;--bg-secondary:#2c2c2a;--text:#f0ede8;--text-muted:#8a8a86;--border:rgba(255,255,255,0.1);--border-med:rgba(255,255,255,0.2);--green-light:#04342C;--green-text:#9FE1CB;--amber-light:#412402;--amber-text:#FAC775;--red-light:#501313;--red-text:#F7C1C1}}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+    html,body{height:100%;overflow:hidden}
+    body{font-family:var(--font);background:var(--bg);color:var(--text)}
+    .app{height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative}
+    .screen{display:none;flex-direction:column;flex:1;overflow-y:auto;padding:12px 14px 24px;gap:12px}
+    .screen.active{display:flex}
+    .app-header{display:flex;align-items:center;gap:10px;padding:0 0 4px;flex-shrink:0}
+    .logo-icon{width:34px;height:34px;border-radius:8px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .logo-icon svg{width:18px;height:18px;fill:white}
+    .logo-title{font-size:16px;font-weight:600}
+    .logo-sub{font-size:11px;color:var(--text-muted)}
+    .card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+    .card-title{font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.04em}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;border:0.5px solid var(--border-med);background:var(--bg-card);color:var(--text);font-family:var(--font);transition:opacity .15s,transform .1s;user-select:none}
+    .btn:active{transform:scale(0.97);opacity:0.8}
+    .btn-primary{background:var(--green);color:white;border-color:var(--green)}
+    .btn-primary:active{background:var(--green-dark)}
+    .btn-block{width:100%}.btn-danger{background:var(--red);color:white;border-color:var(--red)}
+    .btn-sm{padding:7px 12px;font-size:13px}
+    .btn-ghost{background:transparent;border-color:transparent;color:var(--text-muted)}
+    .btn-lg{padding:14px 20px;font-size:18px;font-weight:700;border-radius:var(--radius)}
+    .field{margin-bottom:12px}.field:last-child{margin-bottom:0}
+    label{font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px;font-weight:500}
+    input[type=text],input[type=number],input[type=url],select{width:100%;padding:10px 12px;border:0.5px solid var(--border-med);border-radius:var(--radius-sm);font-size:15px;background:var(--bg-card);color:var(--text);font-family:var(--font);outline:none}
+    input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(29,158,117,0.18)}
+    select{appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 12px center;background-size:16px}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+    .overlay.hidden{display:none}
+    .sheet{background:var(--bg-card);border-radius:var(--radius) var(--radius) 0 0;padding:20px 18px 32px;width:100%;max-width:480px;animation:slideUp .22s ease}
+    @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .sheet-title{font-size:16px;font-weight:600;margin-bottom:16px}
+    #screenPin{background:var(--bg);align-items:center;justify-content:center;gap:16px;padding:20px 14px;overflow-y:auto}
+    @media(max-height:600px){#screenPin{gap:10px;justify-content:flex-start;padding-top:30px}}
+    .pin-logo{text-align:center}
+    .pin-logo .big-icon{width:56px;height:56px;border-radius:14px;background:var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+    .pin-logo .big-icon svg{width:34px;height:34px;fill:white}
+    .pin-title{font-size:20px;font-weight:700}.pin-sub{font-size:14px;color:var(--text-muted);margin-top:4px}
+    .pin-dots{display:flex;gap:16px;justify-content:center}
+    .pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border-med);transition:background .15s,border-color .15s}
+    .pin-dot.filled{background:var(--green);border-color:var(--green)}
+    .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;width:100%}
+    .pin-key{height:58px;border-radius:var(--radius);font-size:22px;font-weight:500;border:0.5px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s,transform .1s;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+    .pin-key:active{transform:scale(0.95);background:var(--bg-secondary)}
+    button{touch-action:manipulation}
+    .pin-error{color:var(--red);font-size:13px;text-align:center;height:18px}
+    .session-bar{background:var(--green-dark);color:white;border-radius:var(--radius);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+    .sb-label{font-size:12px;opacity:0.75;margin-bottom:2px}.sb-corral{font-size:16px;font-weight:600}
+    .sb-count{font-size:32px;font-weight:700;line-height:1}.sb-clabel{font-size:11px;opacity:0.7}
+    .camera-section{flex-shrink:0;position:relative}
+    .camera-wrap{position:relative;border-radius:var(--radius);overflow:hidden;background:#111;aspect-ratio:4/3;border:0.5px solid var(--border)}
+    #videoEl{width:100%;height:100%;object-fit:cover;display:block}
+    .cam-flash{position:absolute;inset:0;background:white;opacity:0;transition:opacity .15s;pointer-events:none;z-index:5;border-radius:var(--radius)}
+    .cam-overlay{position:absolute;inset:0;pointer-events:none}
+    .cam-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60%;height:50%;border:2px solid rgba(29,158,117,0.7);border-radius:8px}
+    .cam-crosshair::before{content:'ENFOCÁ ACÁ';position:absolute;top:-22px;left:50%;transform:translateX(-50%);color:#9FE1CB;font-size:11px;font-weight:700;background:rgba(0,0,0,0.6);padding:2px 8px;border-radius:4px;white-space:nowrap}
+    .cam-status-bar{position:absolute;bottom:0;left:0;right:0;padding:8px 12px;background:rgba(0,0,0,0.5)}
+    .cam-status{font-size:12px;color:white;text-align:center}
+    .detected-toast{position:absolute;top:10px;left:10px;right:10px;border-radius:8px;padding:10px 14px;font-size:15px;font-weight:600;color:white;text-align:center;opacity:0;transition:opacity .2s;pointer-events:none;z-index:6}
+    .detected-toast.show{opacity:1}.detected-toast.ok{background:rgba(29,158,117,0.95)}.detected-toast.dup{background:rgba(186,117,23,0.95)}
+    .cam-perm-msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#111;padding:20px;text-align:center}
+    .cam-perm-msg.show{display:flex}.cam-perm-msg p{color:#ccc;font-size:14px;line-height:1.5}
+    .last-read{display:flex;align-items:center;gap:12px}
+    .last-num{font-family:var(--mono);font-size:26px;font-weight:700;flex:1}
+    .last-meta{font-size:12px;color:var(--text-muted)}.last-actions{display:flex;flex-direction:column;gap:6px}
+    .cam-controls{display:flex;gap:6px}
+    .cam-controls .btn{flex:1;padding:8px 4px;font-size:12px}
+    .list-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+    .list-item{display:flex;align-items:center;gap:8px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px}
+    .list-idx{font-size:12px;color:var(--text-muted);min-width:22px}
+    .list-num{font-family:var(--mono);font-size:15px;font-weight:600;flex:1}
+    .list-edit-btn{font-size:12px;padding:4px 10px;border:0.5px solid var(--border);border-radius:6px;background:transparent;color:var(--text-muted);cursor:pointer;font-family:var(--font)}
+    .list-del-btn{font-size:16px;border:none;background:transparent;cursor:pointer;color:var(--red);padding:10px 14px;margin-left:4px}
+    .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:14px}
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .stat-card{background:var(--bg-secondary);border-radius:var(--radius-sm);padding:12px;text-align:center}
+    .stat-num{font-size:26px;font-weight:700}.stat-label{font-size:12px;color:var(--text-muted)}
+    .csv-preview{font-family:var(--mono);font-size:12px;background:var(--bg-secondary);border-radius:var(--radius-sm);padding:10px 12px;white-space:pre-wrap;word-break:break-all;max-height:140px;overflow-y:auto}
+    .bottom-nav{display:flex;gap:8px;padding:10px 14px 16px;flex-shrink:0;border-top:0.5px solid var(--border);background:var(--bg-card)}
+    .bottom-nav .btn{flex:1}
+    .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600}
+    .badge-green{background:var(--green-light);color:var(--green-text)}
+    .edit-preview{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);text-align:center;padding:12px;background:var(--green-light);border-radius:var(--radius-sm);margin:12px 0}
+    .info-box{background:var(--green-light);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--green-text);line-height:1.5}
+    .conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:6px}
+    .setup-status{font-size:13px;padding:8px;text-align:center;min-height:36px}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-med);border-radius:4px}
+    .cam-tools{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .cam-tools .btn{padding:6px 10px;font-size:13px}
+    .cam-tools .btn.active{background:var(--amber);color:#fff;border-color:var(--amber)}
+    .zoom-wrap{display:none;align-items:center;gap:6px;flex:1}
+    .zoom-wrap input[type=range]{flex:1;height:4px;accent-color:var(--green)}
+    .zoom-label{font-size:11px;color:var(--text-muted);min-width:30px;text-align:center}
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- PIN -->
+  <div class="screen active" id="screenPin">
+    <div class="pin-logo">
+      <div class="big-icon"><svg viewBox="0 0 24 24"><path d="M17.5 12a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0zm-5.5-8C6.477 4 2 8.477 2 14s4.477 10 10 10 10-4.477 10-10S17.523 4 12 4z"/></svg></div>
+      <div class="pin-title">CaravanaScanner</div>
+      <div class="pin-sub">Feedlot · Gemini AI OCR</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:6px;opacity:0.5">v3.0.0</div>
+    </div>
+    <div class="pin-dots"><div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div><div class="pin-dot" id="d2"></div></div>
+    <div class="pin-pad" id="pinPad">
+      <button class="pin-key" data-key="1">1</button><button class="pin-key" data-key="2">2</button><button class="pin-key" data-key="3">3</button>
+      <button class="pin-key" data-key="4">4</button><button class="pin-key" data-key="5">5</button><button class="pin-key" data-key="6">6</button>
+      <button class="pin-key" data-key="7">7</button><button class="pin-key" data-key="8">8</button><button class="pin-key" data-key="9">9</button>
+      <button class="pin-key" data-key="clear" style="font-size:14px">borrar</button><button class="pin-key" data-key="0">0</button><button class="pin-key" data-key="del" style="font-size:20px">⌫</button>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+  </div>
+
+  <!-- START -->
+  <div class="screen" id="screenStart">
+    <div class="app-header">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M17.5 12a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg></div>
+      <div><div class="logo-title">CaravanaScanner</div><div class="logo-sub">Gemini AI OCR <span class="conn-dot" id="connDot" style="background:#4ade80"></span></div></div>
+      <div style="margin-left:auto"><button class="btn btn-sm btn-ghost" onclick="showScreen('screenSetup')">⚙️</button></div>
+    </div>
+    <div class="card" id="startFormCard">
+      <div class="card-title">Nueva sesión de movimiento</div>
+      <div class="two-col" style="margin-bottom:12px">
+        <div class="field">
+          <label>Corral origen</label>
+          <select id="corrOrigen">
+            <option value="" disabled selected>Elegir</option>
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+            <option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="VENTA">VENTA</option>
+            <option value="21">21</option><option value="22">22</option>
+            <option value="A1">A1</option><option value="A2">A2</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option>
+            <option value="VENTA">VENTA</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Corral destino</label>
+          <select id="corrDestino">
+            <option value="" disabled selected>Elegir</option>
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+            <option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option>
+            <option value="21">21</option><option value="22">22</option>
+            <option value="A1">A1</option><option value="A2">A2</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option>
+            <option value="VENTA">VENTA</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Operario (opcional)</label>
+        <select id="operarioSelect" onchange="toggleOperarioOtro()">
+          <option value="Almeira" selected>Almeira</option>
+          <option value="Soto">Soto</option>
+          <option value="Jeremías">Jeremías</option>
+          <option value="Juan Pablo">Juan Pablo</option>
+          <option value="Otro">Otro</option>
+        </select>
+        <input type="text" id="operarioOtro" placeholder="Nombre del operario" style="display:none;margin-top:8px">
+      </div>
+      <button class="btn btn-primary btn-block" onclick="startSession()" style="margin-top:4px">Iniciar escaneo →</button>
+    </div>
+    <div class="card" id="resumeCard" style="display:none">
+      <div class="card-title">Sesión en curso</div>
+      <div id="resumeInfo" style="font-size:14px;color:var(--text-muted);margin-bottom:12px"></div>
+      <button class="btn btn-block" onclick="resumeSession()" style="margin-bottom:8px">Continuar sesión actual</button>
+      <button class="btn btn-block btn-danger" onclick="confirmNewSession()" style="margin-bottom:8px">Finalizar Movimiento</button>
+      <button class="btn btn-block btn-ghost" onclick="showScreen('screenHistory')" style="border:0.5px solid var(--border)">Ver historial de sesiones</button>
+    </div>
+    <div class="card" id="historyCardStart" style="display:none">
+      <button class="btn btn-block btn-ghost" onclick="showScreen('screenHistory')" style="border:0.5px solid var(--border)">Ver historial de sesiones</button>
+    </div>
+    <div class="info-box">🤖 OCR con <b>Gemini AI</b> v3.0 — Preprocesado de imagen, JSON estructurado, compresión WebP, linterna y zoom. Más rápido y preciso.</div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="screen" id="screenSetup">
+    <div class="app-header">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M17.5 12a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg></div>
+      <div><div class="logo-title">Configuración</div><div class="logo-sub">Proxy OCR</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Configuración Rápida (Directa)</div>
+      <div class="field">
+        <label>API Key de Gemini</label>
+        <input type="text" id="apiKeyInput" placeholder="AIzaSy...">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Para escaneo directo ultra-rápido. Se guarda solo en tu dispositivo.</div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="saveProxy()" style="margin-bottom:12px">Guardar Configuración</button>
+      <div class="setup-status" id="setupStatus"></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">Fallback (Proxy Apps Script)</div>
+      <div class="info-box" style="margin-bottom:12px">
+        Opcional: URL del proxy de respaldo. Se usará automáticamente con <b>Google Drive OCR</b> si Gemini falla.
+      </div>
+      <div class="field"><label>URL del Web App</label><input type="url" id="proxyInput" placeholder="https://script.google.com/macros/s/.../exec"></div>
+      <button class="btn btn-block" onclick="testProxy()">Probar proxy</button>
+    </div>
+    <button class="btn btn-block" onclick="showScreen('screenStart')">← Volver</button>
+  </div>
+
+  <!-- SESSION -->
+  <div class="screen" id="screenSession">
+    <div class="session-bar">
+      <div>
+        <div class="sb-label">Movimiento</div>
+        <div class="sb-corral" id="sessionCorrLabel">— → —</div>
+        <div style="font-size:11px;opacity:0.65;margin-top:2px" id="sessionOpLabel"></div>
+      </div>
+      <div style="text-align:right">
+        <div class="sb-count" id="sessionCount">0</div>
+        <div class="sb-clabel" id="sessionLabel" style="line-height:1.2;margin-top:2px">animales</div>
+      </div>
+    </div>
+    
+    <div class="card" id="manualEntryCard" style="flex-shrink:0">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Carga Manual</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;margin:0;cursor:pointer;color:var(--text);text-transform:none;letter-spacing:normal;font-weight:500">
+          <input type="checkbox" id="fijarLote" style="width:auto;margin:0" onchange="toggleFijarLote()"> Fijar Lote
+        </label>
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <label>Lote</label>
+          <input type="number" id="manLote" min="1" max="999" placeholder="Lote" inputmode="numeric" oninput="updateManualPreview()">
+        </div>
+        <div class="field">
+          <label>Animal</label>
+          <input type="number" id="manAnimal" min="1" max="499" placeholder="Animal" inputmode="numeric" oninput="updateManualPreview()">
+        </div>
+      </div>
+      <div class="edit-preview" id="manPreview" style="margin:8px 0">—</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+        <button class="btn btn-ghost" onclick="addNN()" style="background:var(--amber-light);color:var(--amber-text);border-color:transparent">+ Sin Caravana (NN)</button>
+        <button class="btn btn-primary" onclick="saveManual()">Registrar →</button>
+      </div>
+    </div>
+
+    <!-- Resumen por lote -->
+    <div id="loteSummary" style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:-4px;margin-bottom:4px"></div>
+
+    <div class="card" id="lastReadCard" style="display:none; padding:10px 12px; margin-bottom:8px; flex:1; min-height:0; flex-direction:column;">
+      <div class="last-meta" style="margin-bottom:8px; flex-shrink:0">Últimas caravanas cargadas</div>
+      <div id="lastReadList" style="display:flex;flex-direction:column;gap:6px; overflow-y:auto; padding-bottom:4px"></div>
+    </div>
+    
+    <div class="bottom-nav">
+      <button class="btn" onclick="exitSession()">Salir</button>
+      <button class="btn" onclick="showScreen('screenList')">📋 Lista</button>
+      <button class="btn btn-danger" onclick="confirmNewSession()">Finalizar</button>
+    </div>
+  </div>
+
+  <!-- LIST -->
+  <div class="screen" id="screenList" style="padding-bottom:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-size:15px;font-weight:600">Lista completa</span>
+      <span class="badge badge-green" id="totalBadge">0</span>
+    </div>
+    <div class="list-scroll" id="listWrap"><div class="empty-state">Todavía no hay caravanas</div></div>
+    <div class="bottom-nav">
+      <button class="btn" onclick="showScreen('screenSession')">← Volver</button>
+      <button class="btn btn-primary" onclick="showScreen('screenExport')">Exportar CSV</button>
+    </div>
+  </div>
+
+  <!-- EXPORT -->
+  <div class="screen" id="screenExport">
+    <div style="font-size:15px;font-weight:600;flex-shrink:0">Exportar CSV</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num" id="expCount">0</div><div class="stat-label">caravanas</div></div>
+      <div class="stat-card"><div class="stat-num" id="expCorral" style="font-size:18px">—→—</div><div class="stat-label">movimiento</div></div>
+    </div>
+    <div class="card">
+      <div class="field"><label>Nombre del archivo</label><input type="text" id="csvFilename" placeholder="movimiento_5_12"></div>
+      <button class="btn btn-primary btn-block" onclick="showScreen('screenExport')" style="margin-bottom:8px">Compartir</button>
+      <button class="btn btn-block" onclick="shareCSV()">🟢 Compartir por WhatsApp</button>
+    </div>
+    <div class="card"><div class="card-title">Vista previa</div><div class="csv-preview" id="csvPreview"></div></div>
+    <div class="bottom-nav">
+      <button class="btn" onclick="showScreen('screenSession')">← Volver</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmNewSession()">Finalizar Movimiento</button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="screen" id="screenHistory" style="padding-bottom:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-size:15px;font-weight:600">Historial de Sesiones</span>
+    </div>
+    <div class="list-scroll" id="historyWrap"><div class="empty-state">No hay sesiones guardadas</div></div>
+    <div class="bottom-nav">
+      <button class="btn btn-block" onclick="showScreen('screenStart')">← Volver al Inicio</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- EDIT OVERLAY -->
+<div class="overlay hidden" id="sheetEdit" onclick="closeSheetOnBg(event,'sheetEdit')">
+  <div class="sheet">
+    <div class="sheet-title">Editar caravana</div>
+    <div class="two-col">
+      <div class="field"><label>Número de lote</label><input type="number" id="editLote" min="1" max="999" inputmode="numeric" oninput="updateEditPreview()"></div>
+      <div class="field"><label>Nro animal</label><input type="number" id="editAnimal" min="1" max="499" inputmode="numeric" oninput="updateEditPreview()"></div>
+    </div>
+    <div class="edit-preview" id="editPreview">—</div>
+    <div class="two-col">
+      <button class="btn" onclick="closeSheet('sheetEdit')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="app.js"></script>
+</body>
+</html>
