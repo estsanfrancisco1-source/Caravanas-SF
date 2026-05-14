@@ -1,13 +1,11 @@
 // ══════════════════════════════════════
-//  CARAVANA SCANNER v3.0 — GEMINI FLASH OCR
+//  CARAVANA SCANNER v3.1 — MANUAL
 // ══════════════════════════════════════
 const APP = {
   pin:'123', pinBuffer:'', session:null, readings:[],
   readingsSet: new Set(), // Fast duplicate detection
   sessionsHistory:[],
-  stream:null, editIdx:-1, cameraStarted:false,
-  proxyUrl: localStorage.getItem('proxyUrl')||'',
-  apiKey: localStorage.getItem('geminiApiKey')||'',
+  editIdx:-1,
   online: navigator.onLine,
   fijarLote: false
 };
@@ -56,10 +54,6 @@ function showScreen(id){
   if(id==='screenList')renderList();
   if(id==='screenExport')renderExport();
   if(id==='screenHistory')renderHistory();
-  if(id==='screenSetup'){
-    document.getElementById('proxyInput').value=APP.proxyUrl;
-    document.getElementById('apiKeyInput').value=APP.apiKey;
-  }
 }
 
 // ── SHEETS ──
@@ -68,35 +62,7 @@ function closeSheet(id){document.getElementById(id).classList.add('hidden');}
 function closeSheetOnBg(e,id){if(e.target.classList.contains('overlay'))closeSheet(id);}
 
 // ── SETUP ──
-function saveProxy(){
-  let key=document.getElementById('apiKeyInput').value.trim();
-  let url=document.getElementById('proxyInput').value.trim();
-  if(!key){alert('La API Key es obligatoria para la lectura rápida.');return;}
-  
-  APP.apiKey=key; localStorage.setItem('geminiApiKey',key);
-  APP.proxyUrl=url; localStorage.setItem('proxyUrl',url);
-  
-  document.getElementById('setupStatus').innerHTML='✅ Guardado correctamente';
-  document.getElementById('setupStatus').style.color='var(--green)';
-}
-async function testProxy(){
-  let url=document.getElementById('proxyInput').value.trim();
-  if(!url){alert('Primero ingresá la URL del proxy para testearla');return;}
-  if(!url.startsWith('https://script.google.com')){alert('La URL debe empezar con https://script.google.com');return;}
-  
-  try{
-    document.getElementById('setupStatus').textContent='🔄 Probando proxy...';
-    const r=await fetch(url,{method:'GET',redirect:'follow'});
-    const j=await r.json();
-    if(j.status==='ok'){
-      document.getElementById('setupStatus').innerHTML='✅ <b>Proxy conectado</b> — Todo listo';
-      document.getElementById('setupStatus').style.color='var(--green)';
-    } else throw new Error('bad response');
-  }catch(e){
-    document.getElementById('setupStatus').innerHTML='⚠️ No se pudo conectar. Verificá que deployaste como Web App con acceso "Cualquier persona"';
-    document.getElementById('setupStatus').style.color='var(--amber)';
-  }
-}
+
 
 function toggleOperarioOtro(){
   const s=document.getElementById('operarioSelect').value;
@@ -114,7 +80,6 @@ function startSession(){
   const o=document.getElementById('corrOrigen').value;
   const d=document.getElementById('corrDestino').value;
   if(!o||!d){alert('Seleccioná corral origen y destino');return;}
-  if(!APP.apiKey&&!APP.proxyUrl){alert('Primero configurá la API Key en ⚙️ Configuración');showScreen('screenSetup');return;}
   
   let op = document.getElementById('operarioSelect').value;
   if(op === 'Otro') op = document.getElementById('operarioOtro').value.trim();
@@ -128,7 +93,7 @@ function goToSession(){
   showScreen('screenSession');
   document.getElementById('sessionCorrLabel').textContent=APP.session.origen+' → '+APP.session.destino;
   document.getElementById('sessionOpLabel').textContent=APP.session.operario||'';
-  updateCount();updConn();
+  updateCount();
   updateLoteSummary();
   setTimeout(()=>document.getElementById('manLote').focus(), 100);
 }
