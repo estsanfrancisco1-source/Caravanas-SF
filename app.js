@@ -221,16 +221,26 @@ function updateLoteSummary() {
   summary.textContent = txt;
 }
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('manLote')?.addEventListener('keypress', function(e) {
-    if(e.key === 'Enter') { e.preventDefault(); document.getElementById('manAnimal').focus(); }
+  const l_el = document.getElementById('manLote');
+  const a_el = document.getElementById('manAnimal');
+
+  l_el?.addEventListener('input', function() {
+    if(this.value.length >= 3) {
+      a_el.focus();
+    }
   });
-  document.getElementById('manAnimal')?.addEventListener('keypress', function(e) {
+
+  l_el?.addEventListener('keypress', function(e) {
+    if(e.key === 'Enter') { e.preventDefault(); a_el.focus(); }
+  });
+
+  a_el?.addEventListener('keypress', function(e) {
     if(e.key === 'Enter') { e.preventDefault(); saveManual(); }
   });
 });
 function editReading(idx){ openEditSheet(idx); }
 function undoReading(idx){
-  if(!confirm('¿Deshacer '+APP.readings[idx]+'?'))return;
+  if(!confirm('¿Borrar '+APP.readings[idx]+'?'))return;
   const removed=APP.readings.splice(idx,1)[0];
   APP.readingsSet.delete(removed);
   updateCount();saveState();
@@ -259,7 +269,7 @@ function updateLastReadArea() {
     <div style="display:flex;align-items:center;background:var(--bg-secondary);padding:6px 10px;border-radius:var(--radius-sm)">
       <div style="font-family:var(--mono);font-size:18px;font-weight:700;flex:1">${r.val}</div>
       <button class="btn btn-sm" onclick="editReading(${r.idx})" style="padding:4px 8px;font-size:11px;margin-right:4px" ${r.val==='NN'?'disabled':''}>Editar</button>
-      <button class="btn btn-sm btn-ghost" onclick="undoReading(${r.idx})" style="color:var(--red);padding:4px 8px;font-size:11px">Deshacer</button>
+      <button class="btn btn-sm btn-ghost" onclick="undoReading(${r.idx})" style="color:var(--red);padding:4px 8px;font-size:11px">Borrar</button>
     </div>
   `).join('');
 }
