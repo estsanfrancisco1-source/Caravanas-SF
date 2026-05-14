@@ -61,24 +61,6 @@
     .session-bar{background:var(--green-dark);color:white;border-radius:var(--radius);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
     .sb-label{font-size:12px;opacity:0.75;margin-bottom:2px}.sb-corral{font-size:16px;font-weight:600}
     .sb-count{font-size:32px;font-weight:700;line-height:1}.sb-clabel{font-size:11px;opacity:0.7}
-    .camera-section{flex-shrink:0;position:relative}
-    .camera-wrap{position:relative;border-radius:var(--radius);overflow:hidden;background:#111;aspect-ratio:4/3;border:0.5px solid var(--border)}
-    #videoEl{width:100%;height:100%;object-fit:cover;display:block}
-    .cam-flash{position:absolute;inset:0;background:white;opacity:0;transition:opacity .15s;pointer-events:none;z-index:5;border-radius:var(--radius)}
-    .cam-overlay{position:absolute;inset:0;pointer-events:none}
-    .cam-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60%;height:50%;border:2px solid rgba(29,158,117,0.7);border-radius:8px}
-    .cam-crosshair::before{content:'ENFOCÁ ACÁ';position:absolute;top:-22px;left:50%;transform:translateX(-50%);color:#9FE1CB;font-size:11px;font-weight:700;background:rgba(0,0,0,0.6);padding:2px 8px;border-radius:4px;white-space:nowrap}
-    .cam-status-bar{position:absolute;bottom:0;left:0;right:0;padding:8px 12px;background:rgba(0,0,0,0.5)}
-    .cam-status{font-size:12px;color:white;text-align:center}
-    .detected-toast{position:absolute;top:10px;left:10px;right:10px;border-radius:8px;padding:10px 14px;font-size:15px;font-weight:600;color:white;text-align:center;opacity:0;transition:opacity .2s;pointer-events:none;z-index:6}
-    .detected-toast.show{opacity:1}.detected-toast.ok{background:rgba(29,158,117,0.95)}.detected-toast.dup{background:rgba(186,117,23,0.95)}
-    .cam-perm-msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#111;padding:20px;text-align:center}
-    .cam-perm-msg.show{display:flex}.cam-perm-msg p{color:#ccc;font-size:14px;line-height:1.5}
-    .last-read{display:flex;align-items:center;gap:12px}
-    .last-num{font-family:var(--mono);font-size:26px;font-weight:700;flex:1}
-    .last-meta{font-size:12px;color:var(--text-muted)}.last-actions{display:flex;flex-direction:column;gap:6px}
-    .cam-controls{display:flex;gap:6px}
-    .cam-controls .btn{flex:1;padding:8px 4px;font-size:12px}
     .list-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
     .list-item{display:flex;align-items:center;gap:8px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px}
     .list-idx{font-size:12px;color:var(--text-muted);min-width:22px}
@@ -99,12 +81,7 @@
     .conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:6px}
     .setup-status{font-size:13px;padding:8px;text-align:center;min-height:36px}
     ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-med);border-radius:4px}
-    .cam-tools{display:flex;align-items:center;gap:8px;flex-shrink:0}
-    .cam-tools .btn{padding:6px 10px;font-size:13px}
-    .cam-tools .btn.active{background:var(--amber);color:#fff;border-color:var(--amber)}
-    .zoom-wrap{display:none;align-items:center;gap:6px;flex:1}
-    .zoom-wrap input[type=range]{flex:1;height:4px;accent-color:var(--green)}
-    .zoom-label{font-size:11px;color:var(--text-muted);min-width:30px;text-align:center}
+    .list-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
   </style>
 </head>
 <body>
@@ -114,8 +91,8 @@
     <div class="pin-logo">
       <div class="big-icon"><svg viewBox="0 0 24 24"><path d="M17.5 12a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0zm-5.5-8C6.477 4 2 8.477 2 14s4.477 10 10 10 10-4.477 10-10S17.523 4 12 4z"/></svg></div>
       <div class="pin-title">CaravanaScanner</div>
-      <div class="pin-sub">Feedlot · Gemini AI OCR</div>
-      <div style="font-size:10px;color:var(--text-muted);margin-top:6px;opacity:0.5">v3.0.0</div>
+      <div class="pin-sub">Feedlot · Carga Manual</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:6px;opacity:0.5">v3.1.0</div>
     </div>
     <div class="pin-dots"><div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div><div class="pin-dot" id="d2"></div></div>
     <div class="pin-pad" id="pinPad">
@@ -131,8 +108,7 @@
   <div class="screen" id="screenStart">
     <div class="app-header">
       <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M17.5 12a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg></div>
-      <div><div class="logo-title">CaravanaScanner</div><div class="logo-sub">Gemini AI OCR <span class="conn-dot" id="connDot" style="background:#4ade80"></span></div></div>
-      <div style="margin-left:auto"><button class="btn btn-sm btn-ghost" onclick="showScreen('screenSetup')">⚙️</button></div>
+      <div><div class="logo-title">CaravanaScanner</div><div class="logo-sub">Carga Manual <span class="conn-dot" id="connDot" style="background:#4ade80"></span></div></div>
     </div>
     <div class="card" id="startFormCard">
       <div class="card-title">Nueva sesión de movimiento</div>
@@ -171,7 +147,7 @@
         </select>
         <input type="text" id="operarioOtro" placeholder="Nombre del operario" style="display:none;margin-top:8px">
       </div>
-      <button class="btn btn-primary btn-block" onclick="startSession()" style="margin-top:4px">Iniciar escaneo →</button>
+      <button class="btn btn-primary btn-block" onclick="startSession()" style="margin-top:4px">Iniciar sesión →</button>
     </div>
     <div class="card" id="resumeCard" style="display:none">
       <div class="card-title">Sesión en curso</div>
@@ -183,36 +159,9 @@
     <div class="card" id="historyCardStart" style="display:none">
       <button class="btn btn-block btn-ghost" onclick="showScreen('screenHistory')" style="border:0.5px solid var(--border)">Ver historial de sesiones</button>
     </div>
-    <div class="info-box">🤖 OCR con <b>Gemini AI</b> v3.0 — Preprocesado de imagen, JSON estructurado, compresión WebP, linterna y zoom. Más rápido y preciso.</div>
+    <div class="info-box">📱 App optimizada para <b>carga manual rápida</b>. Usá "Fijar Lote" para mayor agilidad en el registro.</div>
   </div>
 
-  <!-- SETUP -->
-  <div class="screen" id="screenSetup">
-    <div class="app-header">
-      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M17.5 12a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg></div>
-      <div><div class="logo-title">Configuración</div><div class="logo-sub">Proxy OCR</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Configuración Rápida (Directa)</div>
-      <div class="field">
-        <label>API Key de Gemini</label>
-        <input type="text" id="apiKeyInput" placeholder="AIzaSy...">
-        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Para escaneo directo ultra-rápido. Se guarda solo en tu dispositivo.</div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="saveProxy()" style="margin-bottom:12px">Guardar Configuración</button>
-      <div class="setup-status" id="setupStatus"></div>
-    </div>
-    
-    <div class="card">
-      <div class="card-title">Fallback (Proxy Apps Script)</div>
-      <div class="info-box" style="margin-bottom:12px">
-        Opcional: URL del proxy de respaldo. Se usará automáticamente con <b>Google Drive OCR</b> si Gemini falla.
-      </div>
-      <div class="field"><label>URL del Web App</label><input type="url" id="proxyInput" placeholder="https://script.google.com/macros/s/.../exec"></div>
-      <button class="btn btn-block" onclick="testProxy()">Probar proxy</button>
-    </div>
-    <button class="btn btn-block" onclick="showScreen('screenStart')">← Volver</button>
-  </div>
 
   <!-- SESSION -->
   <div class="screen" id="screenSession">
