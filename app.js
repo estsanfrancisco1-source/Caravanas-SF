@@ -424,11 +424,24 @@ async function shareCSV(){
   }
 }
 function confirmNewSession(){
-  if(!APP.session || APP.readings.length === 0){
+  if(!APP.session){
     alert('No hay sesión activa para finalizar.');
     return;
   }
-  if(!confirm('¿Finalizar y archivar esta sesión en el historial?'))return;
+
+  // Caso 1: Sesión vacía (descartar)
+  if(APP.readings.length === 0) {
+    if(!confirm('La sesión está vacía. ¿Querés eliminarla y volver al inicio?')) return;
+    APP.session = null;
+    saveState();
+    checkResume();
+    showScreen('screenStart');
+    resetStartForm();
+    return;
+  }
+
+  // Caso 2: Sesión con datos (archivar)
+  if(!confirm('¿Finalizar y archivar esta sesión en el historial?')) return;
   
   APP.sessionsHistory.push({
     session: APP.session,
