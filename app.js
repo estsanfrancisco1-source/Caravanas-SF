@@ -273,7 +273,18 @@ function updateLoteSummary() {
 document.addEventListener('DOMContentLoaded', () => {
   // Registro de Service Worker para PWA
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            if(confirm('Hay una nueva versión disponible con mejoras. ¿Actualizar ahora?')) {
+              window.location.reload();
+            }
+          }
+        });
+      });
+    }).catch(() => {});
   }
 
   const l_el = document.getElementById('manLote');
