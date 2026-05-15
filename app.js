@@ -166,6 +166,19 @@ function addNN(){
   updateLastReadArea();
   if(navigator.vibrate)navigator.vibrate(50);
   showToast("NN (Sin Caravana)", false);
+  
+  // Limpiar campos si el usuario había escrito algo
+  const l_el = document.getElementById('manLote');
+  const a_el = document.getElementById('manAnimal');
+  setTimeout(() => {
+    if(a_el) a_el.value = '';
+    if(l_el && !APP.fijarLote) l_el.value = '';
+    
+    if(!APP.fijarLote && l_el) l_el.focus();
+    else if(a_el) a_el.focus();
+    
+    updateManualPreview();
+  }, 20);
 }
 function updateManualPreview(){
   const l=document.getElementById('manLote').value,a=document.getElementById('manAnimal').value;
@@ -192,21 +205,29 @@ function saveManual(){
   if(!l||!a||a<1||a>499){alert('Valores inválidos (Animal debe ser 1-499)');return;}
   const fmt = l+'-'+String(a).padStart(3,'0');
   if(APP.readingsSet.has(fmt)){alert('Ya registrada');return;}
-  APP.readings.push(fmt);APP.readingsSet.add(fmt);
-  updateCount();saveState();
+  
+  APP.readings.push(fmt);
+  APP.readingsSet.add(fmt);
+  
+  updateCount();
+  saveState();
   updateLastReadArea();
   updateLoteSummary();
+  
   if(navigator.vibrate)navigator.vibrate(50);
   showToast(fmt, false);
   
-  a_el.value='';
-  if(!APP.fijarLote) {
-    l_el.value='';
-    l_el.focus();
-  } else {
-    a_el.focus();
-  }
-  updateManualPreview();
+  // Limpieza total y retorno a Lote (o Animal si está fijado)
+  setTimeout(() => {
+    a_el.value = '';
+    if(!APP.fijarLote) {
+      l_el.value = '';
+      l_el.focus();
+    } else {
+      a_el.focus();
+    }
+    updateManualPreview();
+  }, 20);
 }
 function updateLoteSummary() {
   const summary = document.getElementById('loteSummary');
@@ -388,6 +409,19 @@ function confirmNewSession(){
   if(lrc) lrc.style.display='none';
   checkResume();
   showScreen('screenStart');
+  resetStartForm();
+}
+
+function resetStartForm() {
+  document.getElementById('corrOrigen').value = '';
+  document.getElementById('corrDestino').value = '';
+  const opSelect = document.getElementById('operarioSelect');
+  if(opSelect) opSelect.value = 'Almeira';
+  const opOtro = document.getElementById('operarioOtro');
+  if(opOtro) {
+    opOtro.value = '';
+    opOtro.style.display = 'none';
+  }
 }
 
 // ── HISTORY ──
