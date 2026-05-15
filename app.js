@@ -271,6 +271,11 @@ function updateLoteSummary() {
   summary.textContent = txt;
 }
 document.addEventListener('DOMContentLoaded', () => {
+  // Registro de Service Worker para PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
   const l_el = document.getElementById('manLote');
   const a_el = document.getElementById('manAnimal');
 
