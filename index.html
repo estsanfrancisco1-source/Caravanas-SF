@@ -82,6 +82,9 @@
     .setup-status{font-size:13px;padding:8px;text-align:center;min-height:36px}
     ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-med);border-radius:4px}
     .list-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+    .detected-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--green);color:white;padding:12px 20px;border-radius:40px;font-size:14px;font-weight:600;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,0.2);opacity:0;pointer-events:none;transition:all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28)}
+    .detected-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .detected-toast.dup{background:var(--amber);color:var(--amber-text)}
   </style>
 </head>
 <body>
@@ -279,6 +282,7 @@
 
 
 
+<div id="detectedToast" class="detected-toast"></div>
 <script src="app.js"></script>
 </body>
 </html>

@@ -142,6 +142,7 @@ function saveState(){
 // ── TOAST ──
 function showToast(num,isDup){
   const t=document.getElementById('detectedToast');
+  if(!t) { console.log(num); return; }
   t.textContent=isDup?'⚠ Ya registrada: '+num:'✓ Registrada: '+num;
   t.className='detected-toast show '+(isDup?'dup':'ok');
   setTimeout(()=>t.classList.remove('show'),2200);
@@ -181,8 +182,12 @@ function addNN(){
   }, 20);
 }
 function updateManualPreview(){
-  const l=document.getElementById('manLote').value,a=document.getElementById('manAnimal').value;
-  document.getElementById('manPreview').textContent=(l&&a)?l+'-'+String(parseInt(a)).padStart(3,'0'):'—';
+  const l_el=document.getElementById('manLote'), a_el=document.getElementById('manAnimal');
+  if(!l_el || !a_el) return;
+  const l=l_el.value, a=a_el.value;
+  const p=document.getElementById('manPreview');
+  if(!p) return;
+  p.textContent=(l&&a)?l+'-'+String(parseInt(a)).padStart(3,'0'):'—';
 }
 function toggleFijarLote(){
   APP.fijarLote = document.getElementById('fijarLote').checked;
@@ -194,40 +199,64 @@ function saveManualEmpty(){
   exitSession();
 }
 function saveManual(){
-  const l_el=document.getElementById('manLote'), a_el=document.getElementById('manAnimal');
-  const l=l_el.value, a=parseInt(a_el.value);
-  
-  if(!l && !a_el.value) {
-    saveManualEmpty();
-    return;
-  }
-  
-  if(!l||!a||a<1||a>499){alert('Valores inválidos (Animal debe ser 1-499)');return;}
-  const fmt = l+'-'+String(a).padStart(3,'0');
-  if(APP.readingsSet.has(fmt)){alert('Ya registrada');return;}
-  
-  APP.readings.push(fmt);
-  APP.readingsSet.add(fmt);
-  
-  updateCount();
-  saveState();
-  updateLastReadArea();
-  updateLoteSummary();
-  
-  if(navigator.vibrate)navigator.vibrate(50);
-  showToast(fmt, false);
-  
-  // Limpieza total y retorno a Lote (o Animal si está fijado)
-  setTimeout(() => {
-    a_el.value = '';
-    if(!APP.fijarLote) {
-      l_el.value = '';
-      l_el.focus();
-    } else {
-      a_el.focus();
+  try {
+    const l_el = document.getElementById('manLote');
+    const a_el = document.getElementById('manAnimal');
+    
+    if(!l_el || !a_el) return;
+
+    const l = l_el.value.trim();
+    const a_val = a_el.value.trim();
+    
+    // Si ambos están vacíos, salimos al inicio
+    if(!l && !a_val) {
+      exitSession();
+      return;
     }
-    updateManualPreview();
-  }, 20);
+    
+    const a = parseInt(a_val);
+    if(!l || isNaN(a) || a < 1 || a > 499){
+      alert('Valores inválidos (Animal debe ser 1-499)');
+      return;
+    }
+    
+    const fmt = l + '-' + String(a).padStart(3,'0');
+    if(APP.readingsSet.has(fmt)){
+      alert('Ya registrada: ' + fmt);
+      return;
+    }
+    
+    // Guardar
+    APP.readings.push(fmt);
+    APP.readingsSet.add(fmt);
+    
+    updateCount();
+    saveState();
+    updateLastReadArea();
+    updateLoteSummary();
+    
+    if(navigator.vibrate) navigator.vibrate(50);
+    showToast(fmt, false);
+    
+    // FORZAR LIMPIEZA Y FOCO
+    const resetFields = () => {
+      a_el.value = "";
+      if(!APP.fijarLote) {
+        l_el.value = "";
+        l_el.focus();
+      } else {
+        a_el.focus();
+      }
+      updateManualPreview();
+    };
+
+    resetFields();
+    // Re-intento por si acaso (algunos navegadores móviles lo necesitan)
+    setTimeout(resetFields, 50);
+
+  } catch (err) {
+    alert("Error al registrar: " + err.message);
+  }
 }
 function updateLoteSummary() {
   const summary = document.getElementById('loteSummary');
