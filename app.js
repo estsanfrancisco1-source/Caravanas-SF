@@ -380,7 +380,7 @@ function renderExport(){
   const s=APP.session||{};
   document.getElementById('expCorral').textContent=(s.origen||'?')+'→'+(s.destino||'?');
   const dateStr=(new Date()).toLocaleDateString('es-AR').replace(/\//g,'-');
-  document.getElementById('csvFilename').value='del-'+(s.origen||'')+'-al-'+(s.destino||'')+' '+dateStr;
+  document.getElementById('csvFilename').value = APP.readings.length + ' cbz del-' + (s.origen||'') + '-al-' + (s.destino||'') + ' ' + dateStr;
   const lines=generateCSV().split('\n');
   document.getElementById('csvPreview').textContent=lines.slice(0,10).join('\n')+(lines.length>10?'\n...':'');
 }
@@ -396,9 +396,8 @@ async function shareCSV(){
   const s=APP.session||{};
   const msg=`Se movieron ${APP.readings.length} animales del ${s.origen||'?'} al ${s.destino||'?'}.`;
   
-  // SOLUCIÓN: Usar un nombre de archivo descriptivo (WhatsApp suele ignorar el texto al enviar archivos desde web)
-  // Nombre: "Movimiento - 22 animales - Corral 5 a 10.csv"
-  const fileName = `Movimiento - ${APP.readings.length} animales - Corral ${s.origen} a ${s.destino}.csv`;
+  // Usar el nombre que figura en el campo de texto
+  const fileName = (document.getElementById('csvFilename').value.trim() || 'movimiento') + '.csv';
   
   const blob = new Blob(['\uFEFF'+csv], {type: 'text/csv'});
   const file = new File([blob], fileName, {type: 'text/csv'});
